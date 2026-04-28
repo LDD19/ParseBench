@@ -10,7 +10,7 @@ import fire
 from parse_bench.analysis.aggregation_report import generate_aggregation_report
 from parse_bench.analysis.cli import AnalysisCLI
 from parse_bench.analysis.leaderboard_report import generate_leaderboard_report
-from parse_bench.data.download import download_dataset, is_dataset_ready
+from parse_bench.data.download import default_data_dir, download_dataset, is_dataset_ready
 from parse_bench.evaluation.cli import EvaluationCLI
 from parse_bench.inference.cli import InferenceCLI
 
@@ -104,9 +104,11 @@ class PipelineCLI:
                     skip_inference=skip_inference,
                 )
 
-            # Default input_dir to ./data
+            # Default input_dir based on --test (./data/test vs ./data) so
+            # the test subset doesn't silently get masked by an existing full
+            # dataset at ./data, and so the two coexist without overlay.
             if input_dir is None:
-                input_dir = "./data"
+                input_dir = default_data_dir(test=test)
 
             input_path = Path(input_dir)
             output_base = Path(output_dir) if output_dir else Path("./output")

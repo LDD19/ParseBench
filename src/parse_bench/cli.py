@@ -141,17 +141,24 @@ class BenchCLI:
         """
         return self.data.download(data_dir=data_dir, force=force, test=test)
 
-    def status(self, data_dir: str | Path | None = None) -> int:
+    def status(
+        self,
+        data_dir: str | Path | None = None,
+        test: bool = False,
+    ) -> int:
         """Check if the benchmark dataset is downloaded and ready.
 
         Args:
-            data_dir: Data directory to check (default: ./data)
+            data_dir: Data directory to check
+                (default: ./data, or ./data/test when --test is set)
+            test: Check the small test dataset instead of the full dataset
 
         Example:
             parse-bench status
+            parse-bench status --test
             parse-bench status data/
         """
-        return self.data.status(data_dir=data_dir)
+        return self.data.status(data_dir=data_dir, test=test)
 
     def pipelines(self) -> None:
         """List all available pipeline configurations."""

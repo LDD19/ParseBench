@@ -20,6 +20,22 @@ DATASET_REPO = "llamaindex/ParseBench"
 DATASET_REPO_TYPE = "dataset"
 TEST_DATA_REVISION = "test-data"
 
+# Default on-disk locations. Test data lives in a sibling subdirectory so the
+# two datasets coexist and `--test` does not silently overlay or get masked
+# by an existing full download.
+DEFAULT_DATA_DIR = Path("./data")
+DEFAULT_TEST_DATA_DIR = Path("./data/test")
+
+
+def default_data_dir(test: bool = False) -> Path:
+    """Return the default on-disk dataset path for the given mode.
+
+    Used by every CLI surface that takes ``--test`` so the routing is
+    consistent between ``download``, ``run`` and ``status``.
+    """
+    return DEFAULT_TEST_DATA_DIR if test else DEFAULT_DATA_DIR
+
+
 # Files that must exist for the dataset to be considered complete
 _REQUIRED_FILES = [
     "chart.jsonl",

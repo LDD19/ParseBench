@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from parse_bench.data.download import download_dataset, is_dataset_ready
+from parse_bench.data.download import default_data_dir, download_dataset, is_dataset_ready
 
 
 class DataCLI:
@@ -18,7 +18,8 @@ class DataCLI:
         """Download the parse-bench dataset from HuggingFace.
 
         Args:
-            data_dir: Local directory to store the dataset (default: ./data)
+            data_dir: Local directory to store the dataset
+                (default: ./data, or ./data/test when --test is set)
             force: Force re-download even if data already exists
             test: Download the small test dataset (3 files per category)
 
@@ -26,7 +27,7 @@ class DataCLI:
             Exit code (0 for success, non-zero for failure)
         """
         try:
-            data_path = Path(data_dir) if data_dir else None
+            data_path = Path(data_dir) if data_dir else default_data_dir(test=test)
             download_dataset(data_dir=data_path, force=force, test=test)
             return 0
         except Exception as e:
@@ -39,18 +40,23 @@ class DataCLI:
     def status(
         self,
         data_dir: str | Path | None = None,
+        test: bool = False,
     ) -> int:
         """Check if the dataset is downloaded and show summary statistics.
 
         Args:
-            data_dir: Data directory to check (default: ./data)
+            data_dir: Data directory to check
+                (default: ./data, or ./data/test when --test is set)
+            test: Check the small test dataset instead of the full dataset
 
         Returns:
             Exit code (0 if ready, 1 if not)
         """
         import json
 
-        data_path = Path(data_dir) if data_dir else Path.cwd() / "data"
+        data_path = (
+            Path(data_dir) if data_dir else Path.cwd() / default_data_dir(test=test)
+        )
         ready = is_dataset_ready(data_path)
 
         if not ready:
