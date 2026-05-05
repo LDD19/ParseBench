@@ -16,17 +16,17 @@ from backend.app import app
 
 _FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
 _ASSETS_DIR = _FRONTEND_DIST / "assets"
+_FRONTEND_PUBLIC_STATIC = Path(__file__).parent / "frontend" / "public" / "static"
+_STATIC_DIR = _FRONTEND_DIST / "static"
 
 if _ASSETS_DIR.exists():
     app.mount("/assets", StaticFiles(directory=_ASSETS_DIR), name="assets")
 
+if not _STATIC_DIR.exists():
+    _STATIC_DIR = _FRONTEND_PUBLIC_STATIC
 
-@app.get("/llamaindex-favicon.ico", response_model=None)
-def favicon() -> Response:
-    favicon_file = _FRONTEND_DIST / "llamaindex-favicon.ico"
-    if favicon_file.exists():
-        return FileResponse(favicon_file)
-    return JSONResponse({"message": "Frontend favicon not built yet."}, status_code=404)
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
 
 @app.get("/", response_model=None)
