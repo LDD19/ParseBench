@@ -3083,6 +3083,7 @@ let extractPageFilterEnabled = false;
 const EXTRACT_TEXTAREA_SYNC_FULL_LIMIT = 160;
 const EXTRACT_TEXTAREA_SYNC_VIEWPORT_MARGIN = 360;
 let extractTextareaSyncFrame = null;
+let extractTextareaResizeObserver = null;
 
 /**
  * Return a Map keyed by field_path → rule (the first extract_field rule found for that path,
@@ -7635,7 +7636,15 @@ function ensureTestPanelVisible(options = {}) {
         || panel.offsetWidth
         || Number.parseFloat(window.getComputedStyle(panel).width)
         || 0;
-    const nextWidth = Math.min(Math.max(currentWidth, minWidth), maxWidth);
+    if (currentWidth >= minWidth) {
+        return;
+    }
+
+    const splitPane = document.querySelector('.split-pane');
+    const maxAvailableWidth = splitPane
+        ? getMaxTestPanelWidth(splitPane.getBoundingClientRect())
+        : maxWidth;
+    const nextWidth = Math.min(minWidth, maxWidth, maxAvailableWidth);
     panel.style.width = `${nextWidth}px`;
 }
 
@@ -12403,6 +12412,16 @@ async function confirmBrowseSelection() {
 }
 
 // === Resizer ===
+const MIN_RESIZABLE_PDF_PANEL_WIDTH = 220;
+const MIN_RESIZABLE_TEST_PANEL_WIDTH = 300;
+
+function getMaxTestPanelWidth(containerRect) {
+    return Math.max(
+        MIN_RESIZABLE_TEST_PANEL_WIDTH,
+        containerRect.width - MIN_RESIZABLE_PDF_PANEL_WIDTH,
+    );
+}
+
 function initResizer() {
     const pdfPanel = document.querySelector('.pdf-panel');
     const testPanel = document.querySelector('.test-panel');
@@ -12442,7 +12461,10 @@ function initResizer() {
         } else if (activeResizer === resizerTest && testPanel) {
             // Resizing Test panel (from right edge)
             const newWidth = containerRect.right - e.clientX;
-            if (newWidth >= 300 && newWidth <= 700) {
+            if (
+                newWidth >= MIN_RESIZABLE_TEST_PANEL_WIDTH
+                && newWidth <= getMaxTestPanelWidth(containerRect)
+            ) {
                 testPanel.style.width = `${newWidth}px`;
             }
         }
@@ -13044,6 +13066,13 @@ function initEventListeners() {
             extractTreeScroller.addEventListener('scroll', () => {
                 scheduleVisibleExtractEditorTextareaSync(elements.extractKvRows);
             }, { passive: true });
+        }
+        if (typeof ResizeObserver === 'function') {
+            const resizeTarget = extractTreeScroller || elements.extractEditorSection || elements.extractKvRows;
+            extractTextareaResizeObserver = new ResizeObserver(() => {
+                scheduleVisibleExtractEditorTextareaSync(elements.extractKvRows);
+            });
+            extractTextareaResizeObserver.observe(resizeTarget);
         }
     }
 

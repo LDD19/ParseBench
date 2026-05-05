@@ -845,10 +845,11 @@ body {
 .test-panel {
     width: 400px;
     min-width: 300px;
-    max-width: 700px;
+    max-width: none;
     background: var(--bg-secondary);
     display: flex;
     flex-direction: column;
+    flex: 0 0 auto;
     transition: width 0.2s ease, min-width 0.2s ease, opacity 0.2s ease;
     overflow: hidden;
 }
@@ -2309,9 +2310,9 @@ body {
 }
 
 .extract-node-key {
-    width: 220px;
-    min-width: 160px;
-    flex-shrink: 0;
+    flex: 0 1 clamp(180px, 26%, 520px);
+    min-width: min(180px, 100%);
+    max-width: min(520px, 45%);
 }
 
 .extract-node-key .extract-key {
@@ -2339,7 +2340,8 @@ body {
 
 .extract-node-row--key-editing .extract-node-key,
 .extract-node-key:focus-within {
-    width: 220px;
+    flex-basis: clamp(220px, 32%, 640px);
+    max-width: min(640px, 55%);
 }
 
 .extract-node-row--key-editing .extract-key,

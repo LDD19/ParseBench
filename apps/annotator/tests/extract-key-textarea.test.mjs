@@ -29,7 +29,8 @@ describe('extract key field editor', () => {
         assert.match(js, /scheduleVisibleExtractEditorTextareaSync\(elements\.extractKvRows\)/);
         assert.match(js, /addEventListener\('focusin'/);
         assert.match(js, /addEventListener\('focusout'/);
-        assert.match(css, /\.extract-node-key\s*{\s*width:\s*220px;[^}]*min-width:\s*160px;/s);
+        assert.match(css, /\.extract-node-key\s*{\s*flex:\s*0 1 clamp\(180px, 26%, 520px\);[^}]*max-width:\s*min\(520px, 45%\);/s);
+        assert.match(js, /new ResizeObserver\(\(\) => \{\s*scheduleVisibleExtractEditorTextareaSync\(elements\.extractKvRows\);/s);
         assert.match(css, /\.extract-node-key \.extract-key\s*{[^}]*resize:\s*none;[^}]*word-break:\s*break-word;/s);
     });
 });
