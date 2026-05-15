@@ -313,6 +313,7 @@ class LayoutDetectionModel(StrEnum):
     ANTHROPIC_LAYOUT = "anthropic_layout"
     GEMMA4_LAYOUT = "gemma4_layout"
     DATABRICKS_LAYOUT = "databricks_layout"
+    INFINITY_PARSER2_LAYOUT = "infinity_parser2_layout"
 
 
 LAYOUT_MODEL_INFO: dict[LayoutDetectionModel, dict[str, str]] = {
@@ -427,6 +428,10 @@ LAYOUT_MODEL_INFO: dict[LayoutDetectionModel, dict[str, str]] = {
     LayoutDetectionModel.DATABRICKS_LAYOUT: {
         "name": "Databricks ai_parse_document Layout",
         "hf_url": "https://docs.databricks.com/aws/en/sql/language-manual/functions/ai_parse_document",
+    },
+    LayoutDetectionModel.INFINITY_PARSER2_LAYOUT: {
+        "name": "Infinity-Parser2 Layout",
+        "hf_url": "https://huggingface.co/collections/infly/infinity-parser2",
     },
 }
 
