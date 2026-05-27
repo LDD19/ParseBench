@@ -144,7 +144,7 @@ def generate_comparison_html(comparison_data: dict[str, Any], output_path: Path 
         return html_content
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_content)
     return output_path
 

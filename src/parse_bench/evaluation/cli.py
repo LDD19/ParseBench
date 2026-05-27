@@ -96,7 +96,7 @@ class EvaluationCLI:
             for metadata_path in metadata_paths:
                 if metadata_path.exists():
                     try:
-                        with open(metadata_path) as f:
+                        with open(metadata_path, encoding="utf-8") as f:
                             metadata = json.load(f)
                         # Infer test_cases_dir
                         if test_cases_dir is None and "test_cases_dir" in metadata:
@@ -115,7 +115,7 @@ class EvaluationCLI:
             if product_type is None:
                 for result_file in output_dir_path.rglob("*.result.json"):
                     try:
-                        with open(result_file) as f:
+                        with open(result_file, encoding="utf-8") as f:
                             result_data = json.load(f)
                         if "product_type" in result_data:
                             product_type = result_data["product_type"]
@@ -171,7 +171,7 @@ class EvaluationCLI:
 
             # Save JSON report
             report_json_path = report_dir_path / "_evaluation_report.json"
-            report_json_path.write_text(summary.model_dump_json(indent=2))
+            report_json_path.write_text(summary.model_dump_json(indent=2), encoding="utf-8")
             print("\n✅ Evaluation complete!")
             print(f"📊 Results saved to: {report_json_path.resolve()}")
 

@@ -329,7 +329,7 @@ class EvaluationRunner:
         :return: InferenceResult or None if loading fails
         """
         try:
-            with open(result_path) as f:
+            with open(result_path, encoding="utf-8") as f:
                 data = json.load(f)
             return InferenceResult.model_validate(data)
         except Exception:

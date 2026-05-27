@@ -40,7 +40,7 @@ def renormalize_results(
         metadata_path = output_dir / "_metadata.json"
         if metadata_path.exists():
             try:
-                with open(metadata_path) as f:
+                with open(metadata_path, encoding="utf-8") as f:
                     metadata = json.load(f)
                 pipeline_name = metadata.get("pipeline_name")
             except Exception:
@@ -99,7 +99,7 @@ def renormalize_results(
             if not force and normalized_file.exists():
                 try:
                     # Verify it's valid
-                    with open(normalized_file) as f:
+                    with open(normalized_file, encoding="utf-8") as f:
                         data = json.load(f)
                     if "request" in data and "output" in data:
                         skipped_count += 1
@@ -111,7 +111,7 @@ def renormalize_results(
 
             try:
                 # Load raw result
-                with open(raw_file) as f:
+                with open(raw_file, encoding="utf-8") as f:
                     raw_data = json.load(f)
                 raw_result = RawInferenceResult.model_validate(raw_data)
 
@@ -120,7 +120,7 @@ def renormalize_results(
 
                 # Save normalized result
                 normalized_file.parent.mkdir(parents=True, exist_ok=True)
-                with open(normalized_file, "w") as f:
+                with open(normalized_file, "w", encoding="utf-8") as f:
                     f.write(normalized_result.model_dump_json(indent=2))
 
                 success_count += 1

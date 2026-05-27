@@ -94,5 +94,5 @@ def export_markdown(summary: EvaluationSummary, report_dir: Path) -> Path:
             lines.append(f"- **Error:** {result.error}")
             lines.append("")
 
-    md_path.write_text("\n".join(lines))
+    md_path.write_text("\n".join(lines), encoding="utf-8")
     return md_path
