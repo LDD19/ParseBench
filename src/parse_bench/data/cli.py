@@ -76,7 +76,7 @@ class DataCLI:
 
         for jf in jsonl_files:
             category = jf.stem
-            lines = jf.read_text().strip().splitlines()
+            lines = jf.read_text(encoding="utf-8").strip().splitlines()
             n_cases = len(lines)
             pdfs: set[str] = set()
             for line in lines:

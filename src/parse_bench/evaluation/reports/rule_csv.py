@@ -18,5 +18,5 @@ def export_rule_csv(
     This function now writes an empty file as a placeholder.
     """
     csv_path = report_dir / "_evaluation_rule_results.csv"
-    csv_path.write_text("")
+    csv_path.write_text("", encoding="utf-8")
     return csv_path

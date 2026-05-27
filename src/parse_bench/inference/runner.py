@@ -206,12 +206,12 @@ class InferenceRunner:
 
         # Save summary
         summary_path = self.output_dir / "_summary.json"
-        summary_path.write_text(json.dumps(self._current_summary.to_dict(), indent=2))
+        summary_path.write_text(json.dumps(self._current_summary.to_dict(), indent=2), encoding="utf-8")
 
         # Save errors if any
         if self._current_summary.errors:
             errors_path = self.output_dir / "_errors.json"
-            errors_path.write_text(json.dumps(self._current_summary.errors, indent=2))
+            errors_path.write_text(json.dumps(self._current_summary.errors, indent=2), encoding="utf-8")
 
     def _get_result_paths(self, example_id: str) -> tuple[Path, Path]:
         """Get file paths for raw and normalized results."""
@@ -272,7 +272,7 @@ class InferenceRunner:
         if self.save_normalized and normalized_path.exists():
             try:
                 # Verify it's valid JSON
-                data = json.loads(normalized_path.read_text())
+                data = json.loads(normalized_path.read_text(encoding="utf-8"))
                 # Check if it has required fields
                 if "request" in data and "output" in data:
                     return True
@@ -283,7 +283,7 @@ class InferenceRunner:
         # Check if raw result exists (if we only save raw)
         if self.save_raw and not self.save_normalized and raw_path.exists():
             try:
-                data = json.loads(raw_path.read_text())
+                data = json.loads(raw_path.read_text(encoding="utf-8"))
                 if "request" in data and "raw_output" in data:
                     return True
             except (json.JSONDecodeError, KeyError):
@@ -316,7 +316,7 @@ class InferenceRunner:
                 logs_path = raw_path.parent / f"{base_name}.logs.jsonl"
                 logs_lines = raw_result.raw_output["logs_jsonl_lines"]
                 if isinstance(logs_lines, list):
-                    with open(logs_path, "w") as f:
+                    with open(logs_path, "w", encoding="utf-8") as f:
                         f.writelines(logs_lines)
 
                     # Remove logs from raw_output to avoid duplication in JSON
@@ -326,13 +326,13 @@ class InferenceRunner:
             # Note: parse job logs sidecars + token extraction happen earlier in
             # _fetch_parse_job_logs(), before normalize(), so that the resulting
             # token fields flow into the normalized InferenceResult.
-            raw_path.write_text(raw_result.model_dump_json(indent=2))
+            raw_path.write_text(raw_result.model_dump_json(indent=2), encoding="utf-8")
 
         if self.save_normalized and normalized_result:
             _, normalized_path = self._get_result_paths(example_id)
             # Create parent directory if it doesn't exist (e.g., for group/test_id structure)
             normalized_path.parent.mkdir(parents=True, exist_ok=True)
-            normalized_path.write_text(normalized_result.model_dump_json(indent=2))
+            normalized_path.write_text(normalized_result.model_dump_json(indent=2), encoding="utf-8")
 
     def _save_error_debug_payload(self, example_id: str, payload: dict[str, Any]) -> str | None:
         """Save provider-supplied debug payload for a failed example."""
@@ -341,7 +341,7 @@ class InferenceRunner:
             raw_path.parent.mkdir(parents=True, exist_ok=True)
             base_name = raw_path.stem.removesuffix(".raw")
             debug_path = raw_path.parent / f"{base_name}.error.raw.json"
-            debug_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+            debug_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
             return str(debug_path.relative_to(self.output_dir).as_posix())
         except (TypeError, ValueError, OSError):
             return None
@@ -474,7 +474,7 @@ class InferenceRunner:
                 content = response.read().decode("utf-8")
             # Ensure it is valid JSON and write pretty output.
             parsed = json.loads(content)
-            job_logs_path.write_text(json.dumps(parsed, indent=2, ensure_ascii=False))
+            job_logs_path.write_text(json.dumps(parsed, indent=2, ensure_ascii=False), encoding="utf-8")
             raw_output["job_logs_local_path"] = str(job_logs_path.relative_to(self.output_dir).as_posix())
 
             # Extract token usage from the downloaded log entries
@@ -852,12 +852,12 @@ class InferenceRunner:
 
         # Save summary
         summary_path = self.output_dir / "_summary.json"
-        summary_path.write_text(json.dumps(summary.to_dict(), indent=2))
+        summary_path.write_text(json.dumps(summary.to_dict(), indent=2), encoding="utf-8")
 
         # Save errors if any
         if summary.errors:
             errors_path = self.output_dir / "_errors.json"
-            errors_path.write_text(json.dumps(summary.errors, indent=2))
+            errors_path.write_text(json.dumps(summary.errors, indent=2), encoding="utf-8")
 
         # Save run metadata
         metadata = {
@@ -879,7 +879,7 @@ class InferenceRunner:
         if self.tags:
             metadata["tags"] = self.tags
         metadata_path = self.output_dir / "_metadata.json"
-        metadata_path.write_text(json.dumps(metadata, indent=2))
+        metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
         return summary
 
@@ -1041,12 +1041,12 @@ class InferenceRunner:
 
         # Save summary
         summary_path = self.output_dir / "_summary.json"
-        summary_path.write_text(json.dumps(summary.to_dict(), indent=2))
+        summary_path.write_text(json.dumps(summary.to_dict(), indent=2), encoding="utf-8")
 
         # Save errors if any
         if summary.errors:
             errors_path = self.output_dir / "_errors.json"
-            errors_path.write_text(json.dumps(summary.errors, indent=2))
+            errors_path.write_text(json.dumps(summary.errors, indent=2), encoding="utf-8")
 
         # Save run metadata
         metadata = {
@@ -1071,7 +1071,7 @@ class InferenceRunner:
         if self.tags:
             metadata["tags"] = self.tags
         metadata_path = self.output_dir / "_metadata.json"
-        metadata_path.write_text(json.dumps(metadata, indent=2))
+        metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
         return summary
 
@@ -1599,12 +1599,12 @@ class InferenceRunner:
 
         # Save summary
         summary_path = self.output_dir / "_summary.json"
-        summary_path.write_text(json.dumps(summary.to_dict(), indent=2))
+        summary_path.write_text(json.dumps(summary.to_dict(), indent=2), encoding="utf-8")
 
         # Save errors if any
         if summary.errors:
             errors_path = self.output_dir / "_errors.json"
-            errors_path.write_text(json.dumps(summary.errors, indent=2))
+            errors_path.write_text(json.dumps(summary.errors, indent=2), encoding="utf-8")
 
         # Save run metadata
         metadata = {
@@ -1626,7 +1626,7 @@ class InferenceRunner:
         if self.tags:
             metadata["tags"] = self.tags
         metadata_path = self.output_dir / "_metadata.json"
-        metadata_path.write_text(json.dumps(metadata, indent=2))
+        metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
         return summary
 
@@ -1890,12 +1890,12 @@ class InferenceRunner:
 
         # Save summary
         summary_path = self.output_dir / "_summary.json"
-        summary_path.write_text(json.dumps(summary.to_dict(), indent=2))
+        summary_path.write_text(json.dumps(summary.to_dict(), indent=2), encoding="utf-8")
 
         # Save errors if any
         if summary.errors:
             errors_path = self.output_dir / "_errors.json"
-            errors_path.write_text(json.dumps(summary.errors, indent=2))
+            errors_path.write_text(json.dumps(summary.errors, indent=2), encoding="utf-8")
 
         # Save run metadata
         metadata = {
@@ -1920,6 +1920,6 @@ class InferenceRunner:
         if self.tags:
             metadata["tags"] = self.tags
         metadata_path = self.output_dir / "_metadata.json"
-        metadata_path.write_text(json.dumps(metadata, indent=2))
+        metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
         return summary

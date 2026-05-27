@@ -36,7 +36,7 @@ def export_csv(summary: EvaluationSummary, report_dir: Path) -> Path:
         + sorted_metric_names
     )
 
-    with open(csv_path, "w", newline="") as csvfile:
+    with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 

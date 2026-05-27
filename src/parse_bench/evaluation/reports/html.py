@@ -334,5 +334,5 @@ def export_html(summary: EvaluationSummary, report_dir: Path) -> Path:
         ]
     )
 
-    html_path.write_text("\n".join(html_lines))
+    html_path.write_text("\n".join(html_lines), encoding="utf-8")
     return html_path

@@ -171,7 +171,7 @@ class EvaluationCLI:
 
             # Save JSON report
             report_json_path = report_dir_path / "_evaluation_report.json"
-            report_json_path.write_text(summary.model_dump_json(indent=2))
+            report_json_path.write_text(summary.model_dump_json(indent=2), encoding="utf-8")
             print("\n✅ Evaluation complete!")
             print(f"📊 Results saved to: {report_json_path.resolve()}")
 
@@ -278,7 +278,7 @@ class EvaluationCLI:
                 )
                 return 1
 
-            summary_data = json.loads(summary_json_path.read_text())
+            summary_data = json.loads(summary_json_path.read_text(encoding="utf-8"))
             summary = EvaluationSummary.model_validate(summary_data)
 
             # Auto-detect test_cases_dir from _metadata.json if not provided
@@ -290,7 +290,7 @@ class EvaluationCLI:
             for metadata_path in metadata_paths:
                 if metadata_path.exists():
                     try:
-                        metadata = json.loads(metadata_path.read_text())
+                        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
                         if test_cases_dir is None and "test_cases_dir" in metadata:
                             candidate = Path(metadata["test_cases_dir"])
                             if candidate.exists() and candidate.is_dir():
