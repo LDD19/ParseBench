@@ -120,7 +120,7 @@ def renormalize_results(
 
                 # Save normalized result
                 normalized_file.parent.mkdir(parents=True, exist_ok=True)
-                with open(normalized_file, "w", encoding="utf-8") as f:
+                with open(normalized_file, "w") as f:
                     f.write(normalized_result.model_dump_json(indent=2))
 
                 success_count += 1

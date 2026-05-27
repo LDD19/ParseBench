@@ -437,7 +437,7 @@ def main():  # type: ignore[no-untyped-def]
                 for p in report.pages
             ],
         }
-        with open(args.json_output, "w", encoding="utf-8") as f:
+        with open(args.json_output, "w") as f:
             json.dump(json_data, f, indent=2)
         print(f"\nJSON report saved to: {args.json_output}")
 
