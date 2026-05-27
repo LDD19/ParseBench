@@ -949,7 +949,7 @@ class PageSectionRule(ParseTestRule):
             )
 
             for section_value in section_values:
-                if section_pattern.search(section_value):
+                if section_pattern.search(section_value) or _page_section_text_matches(self.text, section_value):
                     return True, ""
 
             section_label = "header" if self.tag == "page_header" else "footer"
@@ -971,9 +971,52 @@ class PageSectionRule(ParseTestRule):
         if pattern.search(md_content):
             return True, ""
 
+        tagged_values = [
+            match.group(1)
+            for match in re.finditer(
+                r"<" + self.tag + r">" + r"([\s\S]*?)" + r"</" + self.tag + r">",
+                md_content,
+                re.IGNORECASE,
+            )
+        ]
+        if any(_page_section_text_matches(self.text, value) for value in tagged_values):
+            return True, ""
+
         section_label = "header" if self.tag == "page_header" else "footer"
         return (
             False,
             f"Expected '{self.text[:40]}' to appear inside a page {section_label} "
             f"(<{self.tag}>...</{self.tag}>), but it was not found",
         )
+
+
+def _compact_page_section_text(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", normalize_text(text))
+
+
+_PAGE_NUMBER_TAG_RE = re.compile(
+    r"<page_number>\s*([\s\S]*?)\s*</page_number>",
+    re.IGNORECASE,
+)
+
+
+def _page_section_text_variants(text: str) -> list[str]:
+    keep_inner = _PAGE_NUMBER_TAG_RE.sub(lambda match: f" {match.group(1).strip()} ", text)
+    drop_tag = _PAGE_NUMBER_TAG_RE.sub(" ", text)
+    return list(dict.fromkeys([keep_inner, drop_tag]))
+
+
+def _page_section_text_matches(expected: str, actual: str) -> bool:
+    for expected_variant in _page_section_text_variants(expected):
+        for actual_variant in _page_section_text_variants(actual):
+            normalized_expected = normalize_text(expected_variant).strip()
+            normalized_actual = normalize_text(actual_variant).strip()
+            if normalized_expected and normalized_expected in normalized_actual:
+                return True
+
+            compact_expected = _compact_page_section_text(expected_variant)
+            compact_actual = _compact_page_section_text(actual_variant)
+            if compact_expected and compact_expected in compact_actual:
+                return True
+
+    return False

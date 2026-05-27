@@ -28,6 +28,11 @@ _DOCLING_EXCLUDED_LAYOUT_LABELS = frozenset(
 )
 _DOCLING_TABLE_LABELS = frozenset({"document_index", "table"})
 _DOCLING_IMAGE_LABELS = frozenset({"chart", "picture"})
+_DOCLING_PAGE_HEADER_LABEL = "page_header"
+_DOCLING_PAGE_FOOTER_LABEL = "page_footer"
+_DOCLING_PAGE_SECTION_LABELS = frozenset({_DOCLING_PAGE_HEADER_LABEL, _DOCLING_PAGE_FOOTER_LABEL})
+_INFERRED_PAGE_HEADER_MAX_Y = 0.12
+_INFERRED_PAGE_FOOTER_MIN_Y = 0.72
 
 
 def _normalize_docling_label(label: object) -> str | None:
@@ -162,16 +167,163 @@ def _merge_segments(segments: list[LayoutSegmentIR]) -> LayoutSegmentIR | None:
     )
 
 
+def _item_sort_key(item: LayoutItemIR) -> tuple[float, float]:
+    bbox = item.bbox
+    if bbox is None:
+        return (1.0, 1.0)
+    return (bbox.y, bbox.x)
+
+
+def _join_section_markdowns(*values: str) -> str:
+    parts: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        stripped = value.strip()
+        if not stripped or stripped in seen:
+            continue
+        parts.append(stripped)
+        seen.add(stripped)
+    return "\n\n".join(parts)
+
+
+def _raw_page_section_markdown(page_data: dict[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = page_data.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _infer_page_section_markdown_from_items(
+    items: list[LayoutItemIR],
+    *,
+    section_label: str,
+) -> str:
+    entries: list[tuple[tuple[float, float], str]] = []
+
+    for item in items:
+        if item.type != "text" or item.bbox is None:
+            continue
+        labels = {segment.label for segment in item.layout_segments if segment.label}
+        if labels & _DOCLING_PAGE_SECTION_LABELS:
+            continue
+        value = item.value.strip()
+        if not value:
+            continue
+
+        bbox = item.bbox
+        if section_label == _DOCLING_PAGE_HEADER_LABEL and bbox.y <= _INFERRED_PAGE_HEADER_MAX_Y:
+            entries.append(((bbox.y, bbox.x), value))
+        elif section_label == _DOCLING_PAGE_FOOTER_LABEL and bbox.y + bbox.h >= _INFERRED_PAGE_FOOTER_MIN_Y:
+            entries.append(((bbox.y, bbox.x), value))
+
+    return "\n\n".join(value for _key, value in sorted(entries))
+
+
+def _build_docling_page_section_items(
+    *,
+    doc: DoclingDocument,
+    page_number: int,
+    page_width: float,
+    page_height: float,
+    skip_refs: set[str],
+) -> tuple[str, str, list[LayoutItemIR], list[LayoutItemIR]]:
+    """Build page-header/footer layout items from Docling furniture text.
+
+    Docling's ``iterate_items(page_no=...)`` walks the document body and can omit
+    furniture-layer items, so page header/footer text needs a separate pass over
+    ``doc.texts``.
+    """
+
+    header_entries: list[tuple[tuple[float, float], str]] = []
+    footer_entries: list[tuple[tuple[float, float], str]] = []
+    header_items: list[LayoutItemIR] = []
+    footer_items: list[LayoutItemIR] = []
+
+    for item in getattr(doc, "texts", []) or []:
+        raw_label = _normalize_docling_label(getattr(item, "label", None))
+        if raw_label not in _DOCLING_PAGE_SECTION_LABELS:
+            continue
+
+        page_provs = [
+            prov for prov in getattr(item, "prov", []) or [] if getattr(prov, "page_no", None) == page_number
+        ]
+        if not page_provs:
+            continue
+
+        item_value = _extract_docling_item_value(item, doc, raw_label)
+        if not item_value.strip():
+            continue
+
+        segments = [
+            segment
+            for prov in page_provs
+            if (
+                segment := _build_docling_segment(
+                    prov=prov,
+                    raw_label=raw_label,
+                    page_width=page_width,
+                    page_height=page_height,
+                    include_span=True,
+                    text_length=len(item_value),
+                )
+            )
+            is not None
+        ]
+        if not segments:
+            continue
+
+        merged_bbox = _merge_segments(segments)
+        layout_item = LayoutItemIR(
+            type="text",
+            value=item_value,
+            bbox=merged_bbox,
+            layout_segments=segments,
+        )
+        sort_key = _item_sort_key(layout_item)
+        if raw_label == _DOCLING_PAGE_HEADER_LABEL:
+            header_entries.append((sort_key, item_value))
+        else:
+            footer_entries.append((sort_key, item_value))
+
+        self_ref = getattr(item, "self_ref", None)
+        if self_ref is not None and str(self_ref) in skip_refs:
+            continue
+
+        if raw_label == _DOCLING_PAGE_HEADER_LABEL:
+            header_items.append(layout_item)
+        else:
+            footer_items.append(layout_item)
+
+    header_items.sort(key=_item_sort_key)
+    footer_items.sort(key=_item_sort_key)
+    header_markdown = "\n\n".join(value for _key, value in sorted(header_entries))
+    footer_markdown = "\n\n".join(value for _key, value in sorted(footer_entries))
+    return header_markdown, footer_markdown, header_items, footer_items
+
+
 def _build_docling_layout_pages(
     *,
     doc: DoclingDocument,
     raw_pages: list[dict[str, Any]],
 ) -> list[ParseLayoutPageIR]:
     page_markdown_by_number: dict[int, str] = {}
+    page_header_by_number: dict[int, str] = {}
+    page_footer_by_number: dict[int, str] = {}
     for page_data in raw_pages:
         page_number = page_data.get("page")
         if isinstance(page_number, int) and page_number > 0:
             page_markdown_by_number[page_number] = str(page_data.get("markdown", ""))
+            page_header_by_number[page_number] = _raw_page_section_markdown(
+                page_data,
+                "pageHeaderMarkdown",
+                "page_header_markdown",
+            )
+            page_footer_by_number[page_number] = _raw_page_section_markdown(
+                page_data,
+                "pageFooterMarkdown",
+                "page_footer_markdown",
+            )
 
     layout_pages: list[ParseLayoutPageIR] = []
     for page_number in sorted(doc.pages.keys()):
@@ -179,6 +331,7 @@ def _build_docling_layout_pages(
         page_width = float(page.size.width)
         page_height = float(page.size.height)
         items: list[LayoutItemIR] = []
+        seen_refs: set[str] = set()
 
         for item, _level in doc.iterate_items(page_no=page_number):
             raw_label = _normalize_docling_label(getattr(item, "label", None))
@@ -211,6 +364,9 @@ def _build_docling_layout_pages(
                 continue
 
             merged_bbox = _merge_segments(segments)
+            self_ref = getattr(item, "self_ref", None)
+            if self_ref is not None:
+                seen_refs.add(str(self_ref))
             items.append(
                 LayoutItemIR(
                     type=item_type,
@@ -220,12 +376,42 @@ def _build_docling_layout_pages(
                 )
             )
 
+        doc_header_markdown, doc_footer_markdown, header_items, footer_items = _build_docling_page_section_items(
+            doc=doc,
+            page_number=page_number,
+            page_width=page_width,
+            page_height=page_height,
+            skip_refs=seen_refs,
+        )
+        items = header_items + items + footer_items
+
+        inferred_header_markdown = _infer_page_section_markdown_from_items(
+            items,
+            section_label=_DOCLING_PAGE_HEADER_LABEL,
+        )
+        inferred_footer_markdown = _infer_page_section_markdown_from_items(
+            items,
+            section_label=_DOCLING_PAGE_FOOTER_LABEL,
+        )
+        page_header_markdown = _join_section_markdowns(
+            page_header_by_number.get(page_number, ""),
+            doc_header_markdown,
+            inferred_header_markdown,
+        )
+        page_footer_markdown = _join_section_markdowns(
+            page_footer_by_number.get(page_number, ""),
+            doc_footer_markdown,
+            inferred_footer_markdown,
+        )
+
         layout_pages.append(
             ParseLayoutPageIR(
                 page_number=page_number,
                 width=page_width,
                 height=page_height,
                 md=page_markdown_by_number.get(page_number, ""),
+                page_header_markdown=page_header_markdown,
+                page_footer_markdown=page_footer_markdown,
                 items=items,
             )
         )
