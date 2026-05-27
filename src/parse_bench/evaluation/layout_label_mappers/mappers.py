@@ -94,7 +94,7 @@ class LlamaParseRawLabelMapper(LayoutLabelMapper):
         return canonical
 
 
-@register_layout_label_mapper("docling_parse", "model:docling_parse_layout", priority=95)
+@register_layout_label_mapper("docling_parse", "docling_gemini", "model:docling_parse_layout", priority=95)
 class DoclingParseLabelMapper(LayoutLabelMapper):
     """Mapper for raw Docling labels emitted from the native DoclingDocument payload."""
 
