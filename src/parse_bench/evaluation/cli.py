@@ -126,7 +126,7 @@ class EvaluationCLI:
             test_cases_dir_path = Path(test_cases_dir) if test_cases_dir else None
             if verbose and not test_cases_dir_path:
                 print(
-                    "⚠️  Warning: Could not auto-detect test cases directory. "
+                    "Warning: Could not auto-detect test cases directory. "
                     "Use --test_cases_dir to specify it explicitly."
                 )
 
@@ -172,8 +172,8 @@ class EvaluationCLI:
             # Save JSON report
             report_json_path = report_dir_path / "_evaluation_report.json"
             report_json_path.write_text(summary.model_dump_json(indent=2), encoding="utf-8")
-            print("\n✅ Evaluation complete!")
-            print(f"📊 Results saved to: {report_json_path.resolve()}")
+            print("\nEvaluation complete!")
+            print(f"Results saved to: {report_json_path.resolve()}")
 
             # Print summary
             self._print_summary(summary)
@@ -181,7 +181,7 @@ class EvaluationCLI:
             # Export CSV if requested
             if export_csv:
                 csv_path = export_csv_report(summary, report_dir_path)
-                print(f"📄 CSV exported to: {csv_path.resolve()}")
+                print(f"CSV exported to: {csv_path.resolve()}")
 
             # Export rule-level CSV if requested
             if export_rule_csv:
@@ -190,17 +190,17 @@ class EvaluationCLI:
                     report_dir_path,
                     dataset_dir=test_cases_dir_path,
                 )
-                print(f"🧩 Rule CSV exported to: {rule_csv_path.resolve()}")
+                print(f"Rule CSV exported to: {rule_csv_path.resolve()}")
 
             # Export markdown if requested
             if export_markdown:
                 md_path = export_markdown_report(summary, report_dir_path)
-                print(f"📝 Markdown report exported to: {md_path.resolve()}")
+                print(f"Markdown report exported to: {md_path.resolve()}")
 
             # Export HTML if requested
             if export_html:
                 html_path = export_html_report(summary, report_dir_path)
-                print(f"🌐 HTML report exported to: {html_path.resolve()}")
+                print(f"HTML report exported to: {html_path.resolve()}")
 
                 detailed_html_path = generate_detailed_html_report(
                     summary,
@@ -210,7 +210,7 @@ class EvaluationCLI:
                     pipeline_name=pipeline_name,
                     group=group,
                 )
-                print(f"🌐 Detailed HTML report exported to: {detailed_html_path.resolve()}")
+                print(f"Detailed HTML report exported to: {detailed_html_path.resolve()}")
 
             return 0
 
@@ -392,7 +392,7 @@ class EvaluationCLI:
                         print(f"  {metric_name}: {value:.0f}")
 
         if summary.failed > 0:
-            print(f"\n⚠️  {summary.failed} evaluation(s) failed")
+            print(f"\nWarning: {summary.failed} evaluation(s) failed")
             # Show first few errors
             failed_results = [r for r in summary.per_example_results if not r.success]
             for i, result in enumerate(failed_results[:3], 1):

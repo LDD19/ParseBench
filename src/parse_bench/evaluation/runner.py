@@ -571,7 +571,7 @@ class EvaluationRunner:
             if not inference_result:
                 skipped += 1
                 if verbose:
-                    print(f"⚠️  Skipped {result_file.name}: Failed to load inference result")
+                    print(f"Warning: Skipped {result_file.name}: Failed to load inference result")
                 continue
 
             # Filter by product type if specified
@@ -584,7 +584,7 @@ class EvaluationRunner:
                     skipped += 1
                     if verbose:
                         print(
-                            f"⚠️  Skipped {result_file.name}: Product type mismatch "
+                            f"Warning: Skipped {result_file.name}: Product type mismatch "
                             f"({inference_result.product_type.value} != {product_type})"
                         )
                     continue
@@ -599,7 +599,7 @@ class EvaluationRunner:
                     skipped += 1
                     if verbose:
                         print(
-                            f"⚠️  Skipped {result_file.name}: No matching layout test cases found "
+                            f"Warning: Skipped {result_file.name}: No matching layout test cases found "
                             f"(example_id: {inference_result.request.example_id})"
                         )
                     continue
@@ -608,7 +608,7 @@ class EvaluationRunner:
                 if not evaluator:
                     skipped += 1
                     if verbose:
-                        print(f"⚠️  Skipped {result_file.name}: No layout_detection evaluator for cross-evaluation")
+                        print(f"Warning: Skipped {result_file.name}: No layout_detection evaluator for cross-evaluation")
                     continue
 
                 # Add one evaluation task per matched test case (per page)
@@ -622,7 +622,7 @@ class EvaluationRunner:
                 skipped += 1
                 if verbose:
                     print(
-                        f"⚠️  Skipped {result_file.name}: No matching test case found "
+                        f"Warning: Skipped {result_file.name}: No matching test case found "
                         f"(example_id: {inference_result.request.example_id})"
                     )
                 continue
@@ -653,13 +653,13 @@ class EvaluationRunner:
                 if not evaluator:
                     skipped += 1
                     if verbose:
-                        print(f"⚠️  Skipped {result_file.name}: No QA evaluator registered")
+                        print(f"Warning: Skipped {result_file.name}: No QA evaluator registered")
                     continue
                 if not evaluator.can_evaluate(inference_result, test_case):
                     skipped += 1
                     if verbose:
                         print(
-                            f"⚠️  Skipped {result_file.name}: QA evaluator cannot handle this case "
+                            f"Warning: Skipped {result_file.name}: QA evaluator cannot handle this case "
                             f"(test_id: {test_case.test_id})"
                         )
                     continue
@@ -698,7 +698,7 @@ class EvaluationRunner:
                     if not evaluator:
                         skipped += 1
                         if verbose:
-                            print(f"⚠️  Skipped {result_file.name}: No layout_detection evaluator for cross-evaluation")
+                            print(f"Warning: Skipped {result_file.name}: No layout_detection evaluator for cross-evaluation")
                         continue
                     # Mark this as cross-evaluation for special handling later
                     non_qa_evaluations.append((inference_result, test_case, evaluator, True))  # True = is_cross_eval
@@ -709,7 +709,7 @@ class EvaluationRunner:
                         skipped += 1
                         if verbose:
                             print(
-                                f"⚠️  Skipped {result_file.name}: No evaluator registered for "
+                                f"Warning: Skipped {result_file.name}: No evaluator registered for "
                                 f"product type: {result_product_type}"
                             )
                         continue
@@ -718,7 +718,7 @@ class EvaluationRunner:
                         if verbose:
                             reason = "Evaluator cannot evaluate this case"
                             print(
-                                f"⚠️  Skipped {result_file.name}: {reason} "
+                                f"Warning: Skipped {result_file.name}: {reason} "
                                 f"(test_id: {test_case.test_id}, "
                                 f"example_id: {inference_result.request.example_id})"
                             )

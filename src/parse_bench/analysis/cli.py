@@ -108,7 +108,7 @@ class AnalysisCLI:
             print("\nGenerating comparison report...")
             report_path = generate_comparison_html(comparison_data, output_file)
 
-            print(f"\n✓ Comparison report saved to: {report_path.absolute()}")  # type: ignore[union-attr]
+            print(f"\nComparison report saved to: {report_path.absolute()}")  # type: ignore[union-attr]
             print("  Open in browser to view interactive comparison")
 
             return 0
@@ -190,7 +190,7 @@ class AnalysisCLI:
                         )
                         if ret == 0:
                             generated.append(cat_dir.name)
-                    print(f"\n✓ Generated reports for: {', '.join(generated)}")
+                    print(f"\nGenerated reports for: {', '.join(generated)}")
                     return 0
                 else:
                     print(
@@ -270,7 +270,7 @@ class AnalysisCLI:
                 group=group,
             )
 
-            print(f"\n✓ Detailed report saved to: {report_path.absolute()}")
+            print(f"\nDetailed report saved to: {report_path.absolute()}")
             print("  Open in browser to view interactive report")
 
             return 0
@@ -315,7 +315,7 @@ class AnalysisCLI:
                 output_file=out_file,
             )
 
-            print(f"\n✓ Leaderboard saved to: {report_path.absolute()}")
+            print(f"\nLeaderboard saved to: {report_path.absolute()}")
             webbrowser.open(f"file://{report_path.absolute()}")
             return 0
         except Exception as e:
@@ -449,7 +449,7 @@ class AnalysisCLI:
                 groups=groups,
                 pipeline_name=pipeline_name,
             )
-            print(f"\n✓ Dashboard saved to: {report_path.absolute()}")
+            print(f"\nDashboard saved to: {report_path.absolute()}")
             return 0
         except Exception as e:
             import traceback

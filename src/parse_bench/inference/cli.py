@@ -340,7 +340,7 @@ class InferenceCLI:
 
             if summary.errors:
                 errors_file = actual_output_dir / "_errors.json"
-                print(f"\n⚠️  {len(summary.errors)} error(s) occurred. See {errors_file}")
+                print(f"\nWarning: {len(summary.errors)} error(s) occurred. See {errors_file}")
                 # Print first few errors to console
                 print("\nFirst few errors:")
                 for i, error in enumerate(summary.errors[:3], 1):
@@ -391,7 +391,7 @@ class InferenceCLI:
                 runner.save_partial_results()
                 partial_summary = runner.get_current_summary()
                 if partial_summary and partial_summary.errors:
-                    print(f"\n⚠️  {len(partial_summary.errors)} error(s) before interrupt:")
+                    print(f"\nWarning: {len(partial_summary.errors)} error(s) before interrupt:")
                     for i, error in enumerate(partial_summary.errors[:5], 1):
                         example_id = error.get("example_id", "unknown")
                         error_msg = error.get("error", "Unknown error")

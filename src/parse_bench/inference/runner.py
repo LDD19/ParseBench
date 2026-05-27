@@ -1286,8 +1286,8 @@ class InferenceRunner:
         for job in active_jobs[:10]:
             status_style = {
                 "running": "[yellow]● Running[/yellow]",
-                "completed": "[green]✓ Done[/green]",
-                "failed": "[red]✗ Failed[/red]",
+                "completed": "[green]Done[/green]",
+                "failed": "[red]Failed[/red]",
                 "skipped": "[dim]⊘ Skipped[/dim]",
                 "pending": "[dim]○ Pending[/dim]",
             }.get(job.status, job.status)
