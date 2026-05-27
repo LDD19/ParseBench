@@ -14,6 +14,7 @@ _PROVIDER_MODULES = [
     "datalab",
     "deepseekocr2",
     "docling",
+    "docling_gemini",
     "docling_serve",
     "dots_ocr",
     "extend_parse",

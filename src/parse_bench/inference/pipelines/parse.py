@@ -286,6 +286,29 @@ def register_parse_pipelines(register_fn) -> None:  # type: ignore[no-untyped-de
         )
     )
 
+    register_fn(
+        PipelineSpec(
+            pipeline_name="docling_gemini",
+            provider_name="docling_gemini",
+            product_type=ProductType.PARSE,
+            config={
+                "do_ocr": False,
+                "do_table_structure": True,
+                "do_picture_classification": False,
+                "do_picture_description": True,
+                "picture_description_model": "google/gemini-2.5-flash-lite",
+                "accelerator_device": "cuda",
+                "gpu_id": 0,
+                "omp_num_threads": 16,
+                "ocr_batch_size": 64,
+                "layout_batch_size": 640,
+                "table_batch_size": 96,
+                "queue_size": 640,
+                "staging_margin": 2.0,
+            },
+        )
+    )
+
     # =========================================================================
     # Docling Serve
     # =========================================================================

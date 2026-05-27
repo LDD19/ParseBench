@@ -85,6 +85,7 @@ A **pipeline** is a document parsing tool or configuration that you want to eval
 | `qwen3_5_4b_vllm_parse` | Qwen 3 VL |
 | `dots_ocr_1_5_parse` | Dots OCR 1.5 |
 | `docling_parse` | Docling |
+| `docling_gemini` | Docling + Gemini descriptions |
 
 </details>
 
